@@ -1,0 +1,47 @@
+---
+ - hosts: all
+   become: true
+   vars:
+     motto: Ansible Managed node by punopaughey
+   tasks:
+     - name: Installs Python3 and pip3
+       apt: 
+         name:
+          - python3
+          - python3-pip 
+         state: latest
+         update_cache: true
+
+     - name: sets python3 and pip3 as default
+       shell: |
+         echo "alias python='python3'" >> ~/.bashrc
+         echo "alias pip=pip3" >> ~/.bashrc
+
+     - name: Installs Java-open-jdk 
+       apt: name=openjdk-11-jdk state=latest
+
+     - name: Installs MariaDB
+       apt:
+         name:
+          - mariadb-client
+          - mariadb-server
+
+
+     - name: Starting the MariaDB server
+       shell: |
+         mysql_secure_installation
+         systemctl enable mariadb
+         systemctl start mariadb
+         systemctl status mariadb
+
+     - name: creates database and table entry
+       shell: |
+         mariadb
+         CREATE DATABASE [IF NOT EXISTS] test
+         USE test
+         CREATE TABLE tabletest (p_id int NOT NULL AUTO INCREMENT, p_name varchar(50) NOT NULL);
+         INSERT INTO tabletest (p_name) VALUES ('puno')
+
+     - name: creates motd banner
+       debug:
+         msg: '{{ motto }}'
