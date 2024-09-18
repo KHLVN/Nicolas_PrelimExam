@@ -3,6 +3,9 @@
    become: true
    vars:
      motto: Ansible Managed node by punopaughey
+     item:
+       user: khlvn
+       pass: root
    tasks:
      - name: Installs Python3 and pip3
        apt: 
@@ -26,22 +29,23 @@
           - mariadb-client
           - mariadb-server
 
-
      - name: Starting the MariaDB server
-       shell: |
-         mysql_secure_installation
-         systemctl enable mariadb
-         systemctl start mariadb
-         systemctl status mariadb
+       service: name=mariadb state=started enabled=true
 
-     - name: creates database and table entry
-       shell: |
-         mariadb
-         CREATE DATABASE [IF NOT EXISTS] test
-         USE test
-         CREATE TABLE tabletest (p_id int NOT NULL AUTO INCREMENT, p_name varchar(50) NOT NULL);
-         INSERT INTO tabletest (p_name) VALUES ('puno')
+#     - name: creates database and table entry
+#       shell: |
+#         mariadb
+#         CREATE DATABASE [IF NOT EXISTS] test
+#         USE test
+#         CREATE TABLE tabletest (p_id int NOT NULL AUTO INCREMENT, p_name varchar(50) NOT NULL);
+#         INSERT INTO tabletest (p_name) VALUES ('puno')
 
      - name: creates motd banner
        debug:
          msg: '{{ motto }}'
+
+     - name: creates user in linux
+       user:
+         name: "{{ item.user }}"
+         password:  "{{ item.pass }}"
+         state: present
