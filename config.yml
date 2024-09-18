@@ -16,9 +16,11 @@
          update_cache: true
 
      - name: sets python3 and pip3 as default
-       shell: |
-         echo "alias python='python3'" >> ~/.bashrc
-         echo "alias pip=pip3" >> ~/.bashrc
+       lineinfile:
+         dest: ".bashrc"
+         line: |
+            alias python=python3
+            alias pip=pip3
 
      - name: Installs Java-open-jdk 
        apt: name=openjdk-11-jdk state=latest
@@ -32,13 +34,15 @@
      - name: Starting the MariaDB server
        service: name=mariadb state=started enabled=true
 
-#     - name: creates database and table entry
-#       shell: |
-#         mariadb
-#         CREATE DATABASE [IF NOT EXISTS] test
-#         USE test
-#         CREATE TABLE tabletest (p_id int NOT NULL AUTO INCREMENT, p_name varchar(50) NOT NULL);
-#         INSERT INTO tabletest (p_name) VALUES ('puno')
+     - name: creates database and table entry
+       mysql_db:
+         name: test
+         state: present
+     
+     - name: add data to database  
+#       copy: src=dump.sql dest=/tmp/dump.sql
+
+       mysql_db: name=test state=import target=/tmp/dump.sql
 
      - name: creates motd banner
        debug:
